@@ -9,16 +9,22 @@ import pandas
 #tutorial used: https://automating-gis-processes.github.io/CSC18/lessons/L6/clipping-raster.html
 
 def download_cropped_map(source_url, dest_path, lat, lon):
+    """
+    Downloads the topo map at source_url with centerpoint at given lat lon, clips a map 
+    with width and height of 2xBUFFER degrees, and saves to dest_path
+    """
+    BUFFER = 0.12
+
     #read raster
     img = rasterio.open(source_url)
 
     #create bounding box
-    def bbox(lat,lng,margin):                                                                                                                  
+    def bbox(lat, lng, margin):                                                                                                                  
         return Polygon([[lng-margin, lat-margin],[lng-margin, lat+margin],
-        [lng+margin,lat+margin],[lng+margin,lat-margin]])
-    bbox_shp = gpd.GeoDataFrame(pandas.DataFrame(['p1'], columns = ['geom']),
+        [lng+margin, lat+margin],[lng+margin, lat-margin]])
+    bbox_shp = gpd.GeoDataFrame(pandas.DataFrame(['p1'], columns=['geom']),
         crs = {'init':'epsg:4326'},
-        geometry = [bbox(lat,lon,0.12)])
+        geometry = [bbox(lat, lon, BUFFER)])
 
     #convert bounding box to projection of original tif
     bbox_shp = bbox_shp.to_crs(crs=img.meta['crs'])

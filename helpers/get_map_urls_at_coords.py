@@ -3,8 +3,8 @@ import requests
 def get_map_urls_at_coords(lat, lon):
     """  
     returns: dictionary of maps at inputted lat/lon
-        key: name of map
-        value: dictionary with keys sourceId, boundingBox, downloadURL, and publicationYear
+        keys: name of map
+        values: dictionary with keys sourceId, boundingBox, downloadURL, and publicationYear
     """
 
     #form api requests
@@ -21,9 +21,11 @@ def get_map_urls_at_coords(lat, lon):
     #make api requests and log in maps dict
     maps = {}
     for api_request in api_requests:
-        response = requests.get(api_request)
+        response = requests.get(api_request) #make API call
 
-        response_maps = response.json()['items']
+        response_maps = response.json()['items'] #extract map results from api response
+        
+        #save non-repeating maps to dict with important attributes only
         for map in response_maps:
             if map['title'] not in maps:
                 maps[map['title']] = {'sourceId': map['sourceId'], 

@@ -2,22 +2,25 @@ import easyocr
 from PIL import Image, ImageDraw
 import numpy
 
-def get_recognized_text(source_filepath, dest_filepath):
+def get_recognized_text(source_filepath, dest_filepath, color_processing=True):
     '''
     If any instances of the text "Beacon" are found on image, saves annotated
     image to dest_filepath.
+
+    If color_processing is True, attempts to isolate black text.
     '''
 
     img = Image.open(source_filepath)
 
-    #white out all non-black pixels
-    width = img.size[0] 
-    height = img.size[1] 
-    for i in range(0,width):
-        for j in range(0,height):
-            data = img.getpixel((i,j))
-            if not (data[0]<125 and data[1]<125 and data[2]<125):
-                img.putpixel((i,j),(255, 255, 255))
+    #white out all non-black pixels (try to add buffer around black pixels next to account for feathering?)
+    if color_processing:
+        width = img.size[0] 
+        height = img.size[1] 
+        for i in range(0,width):
+            for j in range(0,height):
+                data = img.getpixel((i,j))
+                if not (data[0]<125 and data[1]<125 and data[2]<125):
+                    img.putpixel((i,j),(255, 255, 255))
 
     #find locations of text
     img_array = numpy.array(img) #convert to array
