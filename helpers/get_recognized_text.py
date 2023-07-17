@@ -2,11 +2,13 @@ import easyocr
 from PIL import Image, ImageDraw
 import numpy
 
-def get_recognized_text(source_filepath, dest_filepath, color_processing=True):
+def get_recognized_text(source_filepath, dest_filepath, ocr_reader, color_processing=True):
     '''
-    If any instances of the text "Beacon" are found on image, saves annotated
+    If any instances of the text "Beacon" are found on image at source_filepath, saves annotated
     image to dest_filepath.
 
+    Must pass in ocr_reader (text recognition model) as argument to avoid it being loaded into memory multiple times.
+    
     If color_processing is True, attempts to isolate black text.
     '''
 
@@ -24,8 +26,7 @@ def get_recognized_text(source_filepath, dest_filepath, color_processing=True):
 
     #find locations of text
     img_array = numpy.array(img) #convert to array
-    reader = easyocr.Reader(['en']) # load the model into memory - MOVE OUTSIDE FUNCTION
-    all_text = reader.readtext(img_array)
+    all_text = ocr_reader.readtext(img_array)
 
     #filter for "beacon"
     beacon_instances = []
