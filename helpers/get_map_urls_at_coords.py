@@ -20,17 +20,19 @@ def get_map_urls_at_coords(lat, lon):
 
     #make api requests and log in maps dict
     maps = {}
-    for api_request in api_requests:
-        response = requests.get(api_request) #make API call
-
-        response_maps = response.json()['items'] #extract map results from api response
-        
-        #save non-repeating maps to dict with important attributes only
-        for map in response_maps:
-            if map['title'] not in maps:
-                maps[map['title']] = {'sourceId': map['sourceId'], 
-                                      'boundingBox': map['boundingBox'], 
-                                      'downloadURL': map['downloadURL'], 
-                                      'publicationYear': map['publicationDate'][0:4]}
+    for api_request in api_requests: 
+        try:
+            res = requests.get(api_request).json() #make API call
+            
+            if 'items' in res.keys():
+                #save non-repeating maps to dict with important attributes only
+                for map in res['items']:
+                    if map['title'] not in maps:
+                        maps[map['title']] = {'sourceId': map['sourceId'], 
+                                            'boundingBox': map['boundingBox'], 
+                                            'downloadURL': map['downloadURL'], 
+                                            'publicationYear': map['publicationDate'][0:4]}
+        except:
+            print(res) #TODO: error handling here could be improved - usually a timeout, should try 2x before moving on
 
     return maps

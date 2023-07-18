@@ -6,6 +6,11 @@ import geopandas as gpd
 import json
 import pandas
 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) #whoops bad practice
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
+
 #tutorial used: https://automating-gis-processes.github.io/CSC18/lessons/L6/clipping-raster.html
 
 def download_cropped_map(source_url, dest_path, lat, lon):
@@ -13,7 +18,7 @@ def download_cropped_map(source_url, dest_path, lat, lon):
     Downloads the topo map at source_url with centerpoint at given lat lon, clips a map 
     with width and height of 2xBUFFER degrees, and saves to dest_path
     """
-    BUFFER = 0.12
+    BUFFER = 0.05
 
     #read raster
     img = rasterio.open(source_url)
