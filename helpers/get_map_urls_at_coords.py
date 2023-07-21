@@ -1,10 +1,11 @@
 import requests
+import sys
 
 def get_map_urls_at_coords(lat, lon):
     """  
     returns: dictionary of maps at inputted lat/lon
         keys: name of map
-        values: dictionary with keys sourceId, boundingBox, downloadURL, and publicationYear
+        values: dictionary with keys sourceId, boundingBox, downloadURL, publicationYear, and scale
     """
 
     #form api requests
@@ -27,12 +28,17 @@ def get_map_urls_at_coords(lat, lon):
             if 'items' in res.keys():
                 #save non-repeating maps to dict with important attributes only
                 for map in res['items']:
-                    if map['title'] not in maps:
-                        maps[map['title']] = {'sourceId': map['sourceId'], 
+                    title = map['title']
+                    if title not in maps:
+                        maps[title] = {'sourceId': map['sourceId'], 
                                             'boundingBox': map['boundingBox'], 
                                             'downloadURL': map['downloadURL'], 
-                                            'publicationYear': map['publicationDate'][0:4]}
-        except:
-            print(res) #TODO: error handling here could be improved - usually a timeout, should try 2x before moving on
+                                            'publicationYear': map['publicationDate'][0:4],
+                                            'scale': int(title[title.find(":")+1:title.find("-")]),
+                                            }
+        except Exception as e:
+            print("***ERROR***")
+            print (e, file=sys.stderr) #TODO: error handling here could be improved - usually a timeout, should try 2x before moving on
+
 
     return maps

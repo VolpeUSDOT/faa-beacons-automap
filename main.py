@@ -15,7 +15,7 @@ test_image_out = "Test_Inputs_Outputs/text recognition test image 1 out.png"
 
 #FUNCTION TESTING
 #maps = get_map_urls_at_coords(lat, lon)
-#download_cropped_map(url2, "beacon_example.tif", lat, lon)
+#ownload_cropped_map(test_url2, "beacon_example.tif", test_lat, test_lon, 250000)
 #ocr_reader = easyocr.Reader(['en'], verbose=False)
 #get_recognized_text("detection_outputs_22_N_beacons_kml_USGS_1_250000_scale_Quadrangle_for_Douglas__AZ_1959_5a8a3eeee4b00f54eb3eadcc.tif", "test_inputs_outputs/site_22_test.tif", ocr_reader)
 
@@ -81,7 +81,7 @@ def batch_locating(start_site_id, end_site_id):
             try:
                 #(STEP 3)
                 print(f'Progress: site {site_id}: downloading map "{map_title}"')
-                download_cropped_map(map_info["downloadURL"], get_filename('N'), lat, lon)
+                download_cropped_map(map_info["downloadURL"], get_filename('N'), lat, lon, map_info['scale'])
 
                 #(STEP 4)
                 print(f'Progress: site {site_id}: running ocr for map "{map_title}"')
@@ -92,4 +92,5 @@ def batch_locating(start_site_id, end_site_id):
         print(f"Progress: all maps processed and saved for site {site_id}.")
 
 
-batch_locating(1, 22)
+batch_locating(341, 1000)
+#stopped at 288

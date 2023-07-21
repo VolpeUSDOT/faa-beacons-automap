@@ -43,7 +43,7 @@ def get_recognized_text(source_filepath, dest_filepath, ocr_reader, color_proces
         text = entry[1].lower().replace(" ", "")
         if len(text) == 2 and in_beacon(text):
             add_instance(text, entry)
-        elif len(text) > 2 and len(text) < 12:
+        elif len(text) > 2 and len(text) < 15:
             #find all substrings of length 3 or greater and check if in the word beacon
             substrings = [text[i:j] for i in range(len(text)) for j in range(i+3, len(text)+1)]
             for substring in substrings:
@@ -61,7 +61,7 @@ def get_recognized_text(source_filepath, dest_filepath, ocr_reader, color_proces
             #     if len(filtered) > 4:
             #         add_instance(text, entry)
 
-    
+
     #draw polygon around "beacon" instances
     if beacon_instances:
         print("     +--> drawing and saving")
