@@ -7,8 +7,9 @@ import json
 import pandas
 from PIL import Image, ImageDraw
 
+#whoops bad practice
 import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning) #whoops bad practice
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 

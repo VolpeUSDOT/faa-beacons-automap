@@ -1,24 +1,9 @@
 from helpers.get_map_urls_at_coords import get_map_urls_at_coords
 from helpers.download_cropped_map import download_cropped_map
 from helpers.get_recognized_text import get_recognized_text
-
 import easyocr
 import pandas
-
-#TEST INPUTS
-test_lat = 34.500880266090036 #x
-test_lon = -118.2829927423854 #y
-test_url1 = 'https://prd-tnm.s3.amazonaws.com/StagedProducts/Maps/HistoricalTopo/GeoTIFF/CA/CA_Los%20Angeles_299820_1975_250000_geo.tif'
-test_url2 = 'https://prd-tnm.s3.amazonaws.com/StagedProducts/Maps/HistoricalTopo/GeoTIFF/CA/CA_Los%20Angeles_299817_1966_250000_geo.tif' #has one instance of the word beacon
-test_image = "Test_Inputs_Outputs/text recognition test image 1.png"
-test_image_out = "Test_Inputs_Outputs/text recognition test image 1 out.png"
-
-#FUNCTION TESTING
-#maps = get_map_urls_at_coords(lat, lon)
-#ownload_cropped_map(test_url2, "beacon_example.tif", test_lat, test_lon, 250000)
-#ocr_reader = easyocr.Reader(['en'], verbose=False)
-#get_recognized_text("detection_outputs_22_N_beacons_kml_USGS_1_250000_scale_Quadrangle_for_Douglas__AZ_1959_5a8a3eeee4b00f54eb3eadcc.tif", "test_inputs_outputs/site_22_test.tif", ocr_reader)
-
+import sys
 
 def batch_locating(start_site_id, end_site_id):
     """
@@ -30,17 +15,20 @@ def batch_locating(start_site_id, end_site_id):
             saving a map with all found instances of the word "beacon" highlighted if any are found, deleting the original downloaded map
     """
 
+    #FILEPATHS - CHANGE AS NEEDED
+    BEACONS_CSV_PATH = "LightBeacons_Supplemental_July17_Datatable.csv"
+    MAP_OUTPUT_FOLDER = "../detection outputs/"
+
     #(STEP 1)
     #open csv
-    BEACONS_CSV = "LightBeacons_Supplemental_July17_Datatable.csv"
-    beacons_df = pandas.read_csv(BEACONS_CSV, encoding='Latin-1')
+    beacons_df = pandas.read_csv(BEACONS_CSV_PATH, encoding='Latin-1')
     beacons_df = beacons_df.reset_index()
 
     best_centerpoints = {} #keys: site_id, values: {latitude, longitude, source}
     def write_centerpoint(site_id, lat, lon, source):
         best_centerpoints[site_id] = (lat, lon, source)
 
-    for index, row in beacons_df.iterrows(): #iterating over a dataframe but it's fine-ish because the ocr is the real bottleneck
+    for index, row in beacons_df.iterrows(): #iterating over a dataframe is bad practice but it's fine-ish because the ocr is the real bottleneck
         site_id = row['site_id']
 
         if site_id < start_site_id: #don't process and data for sites before start_site_id
@@ -69,14 +57,14 @@ def batch_locating(start_site_id, end_site_id):
 
         #(STEP 2)
         print(f'Progress: site {site_id}: finding map download urls at coordinates')
-        map_urls = get_map_urls_at_coords(lat, lon)
+        map_urls = get_map_urls_at_coords(lat, lon, site_id)
         print(f'    {len(map_urls.keys())} map urls found')
 
-        for map_title, map_info in map_urls.items(): #TODO: want to have this block in some sort of try/except block in case download/crop/recognition fails
+        for map_title, map_info in map_urls.items():
             def get_filename(type):            
                 filename = f'{site_id}_{type}_{source}_{map_title}_{map_info["sourceId"]}'
                 filename = "".join(x if x.isalnum() else "_" for x in filename) + ".tif" #clean filename - alphanumeric characters only
-                return 'detection outputs/' + filename
+                return MAP_OUTPUT_FOLDER + filename
             
             try:
                 #(STEP 3)
@@ -86,11 +74,31 @@ def batch_locating(start_site_id, end_site_id):
                 #(STEP 4)
                 print(f'Progress: site {site_id}: running ocr for map "{map_title}"')
                 get_recognized_text(get_filename('N'), get_filename('Y'), ocr_reader)
-            except:
-                print(Exception)
+            
+            except Exception as e:
+                with open("errorlog.txt", "a") as errorlog:
+                    errorlog.write(str(site_id))
+                    errorlog.write(str(e))
+                print("***ERROR***")
+                print (e, file=sys.stderr)
             
         print(f"Progress: all maps processed and saved for site {site_id}.")
 
 
-batch_locating(341, 1000)
-#stopped at 288
+batch_locating(1, 2923)
+#2923 is last site with a kml point (the generally accurate type)
+
+
+# TEST INPUTS
+# test_lat = 34.500880266090036 #x
+# test_lon = -118.2829927423854 #y
+# test_url1 = 'https://prd-tnm.s3.amazonaws.com/StagedProducts/Maps/HistoricalTopo/GeoTIFF/CA/CA_Los%20Angeles_299820_1975_250000_geo.tif'
+# test_url2 = 'https://prd-tnm.s3.amazonaws.com/StagedProducts/Maps/HistoricalTopo/GeoTIFF/CA/CA_Los%20Angeles_299817_1966_250000_geo.tif' #has one instance of the word beacon
+# test_image = "Test_Inputs_Outputs/text recognition test image 1.png"
+# test_image_out = "Test_Inputs_Outputs/text recognition test image 1 out.png"
+
+# FUNCTION TESTING
+# maps = get_map_urls_at_coords(lat, lon)
+# ownload_cropped_map(test_url2, "beacon_example.tif", test_lat, test_lon, 250000)
+# ocr_reader = easyocr.Reader(['en'], verbose=False)
+# get_recognized_text("detection_outputs_22_N_beacons_kml_USGS_1_250000_scale_Quadrangle_for_Douglas__AZ_1959_5a8a3eeee4b00f54eb3eadcc.tif", "test_inputs_outputs/site_22_test.tif", ocr_reader)

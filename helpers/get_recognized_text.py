@@ -51,17 +51,6 @@ def get_recognized_text(source_filepath, dest_filepath, ocr_reader, color_proces
                     add_instance(text, entry)
                     break
             
-            #handling strings that are about the right length but may be badly misspelled
-            #TODO: ERROR HERE SOMEWHERE
-            # if len(text) in range(5, 10):
-            #     filtered = ''
-            #     for letter in text:
-            #         if in_beacon(letter):
-            #             filtered += letter
-            #     if len(filtered) > 4:
-            #         add_instance(text, entry)
-
-
     #draw polygon around "beacon" instances
     if beacon_instances:
         print("     +--> drawing and saving")

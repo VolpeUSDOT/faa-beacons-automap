@@ -1,7 +1,7 @@
 import requests
 import sys
 
-def get_map_urls_at_coords(lat, lon):
+def get_map_urls_at_coords(lat, lon, site_id):
     """  
     returns: dictionary of maps at inputted lat/lon
         keys: name of map
@@ -19,7 +19,7 @@ def get_map_urls_at_coords(lat, lon):
     for api_extent in api_extents:
         api_requests.append(api_base_url + api_format + api_extent + api_dataset + api_bbox)
 
-    #make api requests and log in maps dict
+    #make api request for each extent and log urls in maps dict
     maps = {}
     for api_request in api_requests: 
         try:
@@ -37,8 +37,12 @@ def get_map_urls_at_coords(lat, lon):
                                             'scale': int(title[title.find(":")+1:title.find("-")]),
                                             }
         except Exception as e:
+            with open("errorlog.txt", "a") as errorlog:
+                errorlog.write(str(site_id))
+                errorlog.write(str(e))
+                errorlog.write(api_request)
             print("***ERROR***")
-            print (e, file=sys.stderr) #TODO: error handling here could be improved - usually a timeout, should try 2x before moving on
+            print(e, file=sys.stderr)
 
 
     return maps
